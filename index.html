@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fluid Image — Interactive Liquid Simulation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bodoni+Moda:ital,wght@0,400;0,700;1,400&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --ink: #f5f1e8;
+    --accent: #ff3d5a;
+    --accent-2: #4fd1c5;
+    --panel: rgba(20, 20, 28, 0.85);
+    --border: rgba(245, 241, 232, 0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Space Mono', monospace;
+    cursor: crosshair;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(255, 61, 90, 0.08), transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(79, 209, 197, 0.08), transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #stage {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+  }
+
+  canvas {
+    display: block;
+    max-width: 90vw;
+    max-height: 80vh;
+    border: 1px solid var(--border);
+    box-shadow:
+      0 0 0 1px rgba(255, 61, 90, 0.1),
+      0 20px 80px rgba(0, 0, 0, 0.6),
+      inset 0 0 40px rgba(0, 0, 0, 0.3);
+    background: #000;
+  }
+
+  /* Header */
+  header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 18px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+    background: linear-gradient(to bottom, rgba(10,10,15,0.9), transparent);
+    pointer-events: none;
+  }
+
+  header > * { pointer-events: auto; }
+
+  .brand {
+    font-family: 'Bodoni Moda', serif;
+    font-style: italic;
+    font-size: 28px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+  }
+
+  .brand span {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .back-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 10px 18px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+  }
+
+  .back-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateX(-3px);
+  }
+
+  /* Control panel */
+  .panel {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--panel);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    padding: 20px 28px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    max-width: 95vw;
+  }
+
+  .control {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 110px;
+  }
+
+  .control label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    opacity: 0.6;
+  }
+
+  .control input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 2px;
+    background: rgba(245, 241, 232, 0.2);
+    outline: none;
+    cursor: pointer;
+  }
+
+  .control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .control input[type="range"]::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    background: var(--accent);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .control .value {
+    font-size: 11px;
+    color: var(--accent-2);
+    font-weight: 700;
+  }
+
+  .btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 10px 16px;
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(255, 61, 90, 0.05);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+
+  .btn-primary:hover {
+    background: transparent;
+    color: var(--accent);
+  }
+
+  /* Mode selector */
+  .modes {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+  }
+
+  .modes button {
+    background: transparent;
+    color: var(--ink);
+    border: none;
+    border-right: 1px solid var(--border);
+    padding: 10px 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .modes button:last-child { border-right: none; }
+  .modes button:hover { background: rgba(255, 61, 90, 0.1); }
+  .modes button.active {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  /* Drop zone overlay */
+  .dropzone {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 15, 0.95);
+    backdrop-filter: blur(20px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    transition: opacity 0.4s ease;
+  }
+
+  .dropzone.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .dropzone-inner {
+    border: 2px dashed var(--border);
+    padding: 80px 100px;
+    transition: all 0.3s ease;
+    max-width: 600px;
+  }
+
+  .dropzone.dragover .dropzone-inner {
+    border-color: var(--accent);
+    background: rgba(255, 61, 90, 0.05);
+    transform: scale(1.02);
+  }
+
+  .dropzone h1 {
+    font-family: 'Bodoni Moda', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 72px;
+    line-height: 1;
+    margin-bottom: 20px;
+    letter-spacing: -2px;
+  }
+
+  .dropzone h1 span {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .dropzone p {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    opacity: 0.6;
+    margin-bottom: 36px;
+  }
+
+  .dropzone .upload-btn {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--bg);
+    padding: 16px 36px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 700;
+  }
+
+  .dropzone .upload-btn:hover {
+    background: var(--ink);
+    color: var(--bg);
+  }
+
+  .dropzone .hint {
+    margin-top: 32px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    opacity: 0.4;
+  }
+
+  /* Info corner */
+  .info {
+    position: fixed;
+    top: 50%;
+    right: 24px;
+    transform: translateY(-50%) rotate(90deg);
+    transform-origin: right center;
+    font-size: 9px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    opacity: 0.3;
+    z-index: 5;
+    white-space: nowrap;
+  }
+
+  /* FPS counter */
+  .fps {
+    position: fixed;
+    top: 80px;
+    left: 28px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--accent-2);
+    opacity: 0.7;
+    z-index: 5;
+  }
+
+  @media (max-width: 768px) {
+    .dropzone h1 { font-size: 42px; }
+    .dropzone-inner { padding: 50px 30px; }
+    .panel { padding: 14px; gap: 12px; }
+    .control { min-width: 80px; }
+    .brand { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Fluid<span>Image</span></div>
+  <a href="/" class="back-btn">← Späť na portál</a>
+</header>
+
+<div class="fps" id="fps">— FPS</div>
+<div class="info">DRAG TO DISTURB · RIGHT-CLICK TO CALM</div>
+
+<div id="stage">
+  <canvas id="canvas"></canvas>
+</div>
+
+<!-- Drop zone -->
+<div class="dropzone" id="dropzone">
+  <div class="dropzone-inner">
+    <h1>Make your image<br><span>liquid.</span></h1>
+    <p>Drop an image · Watch it flow</p>
+    <label class="upload-btn" for="fileInput">Choose image</label>
+    <input type="file" id="fileInput" accept="image/*" style="display:none;">
+    <div class="hint">or drag &amp; drop anywhere</div>
+  </div>
+</div>
+
+<!-- Controls -->
+<div class="panel" id="panel" style="display:none;">
+
+  <div class="modes">
+    <button data-mode="normal" class="active">Normal</button>
+    <button data-mode="velocity">Velocity</button>
+    <button data-mode="ink">Ink Drop</button>
+  </div>
+
+  <div class="control">
+    <label>Brush Size</label>
+    <input type="range" id="brushSize" min="10" max="80" value="35">
+    <div class="value" id="brushSizeVal">35</div>
+  </div>
+
+  <div class="control">
+    <label>Force</label>
+    <input type="range" id="force" min="1" max="20" value="8">
+    <div class="value" id="forceVal">8</div>
+  </div>
+
+  <div class="control">
+    <label>Viscosity</label>
+    <input type="range" id="viscosity" min="80" max="99" value="94">
+    <div class="value" id="viscosityVal">94</div>
+  </div>
+
+  <button class="btn" id="resetBtn">Reset</button>
+  <button class="btn" id="newImgBtn">New Image</button>
+  <button class="btn btn-primary" id="saveBtn">Save PNG</button>
+</div>
+
+<script>
+/* =========================================================
+   FLUID IMAGE — Interactive Liquid Simulation
+   Pure client-side, no backend, no external libs
+   ========================================================= */
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d', { willReadFrequently: true });
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const panel = document.getElementById('panel');
+const fpsEl = document.getElementById('fps');
+
+// State
+let W = 0, H = 0;
+let originalImageData = null; // backup for reset
+let displacement = null;       // Float32Array of (dx, dy) per pixel
+let velocity = null;           // Float32Array of (vx, vy) per pixel
+let mode = 'normal';
+let running = false;
+
+// Parameters
+let brushSize = 35;
+let force = 8;
+let viscosity = 0.94; // 0.80..0.99 → higher = thicker fluid (more memory)
+
+// Mouse
+let mouse = { x: 0, y: 0, px: 0, py: 0, down: false, button: 0 };
+
+/* ---------- Image loading ---------- */
+
+function loadImage(file) {
+  if (!file || !file.type.startsWith('image/')) {
+    alert('Please drop an image file (PNG, JPG, GIF, WebP).');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => initWithImage(img);
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function initWithImage(img) {
+  // Fit image into canvas while keeping aspect ratio, max 800px on longer side
+  const MAX = 800;
+  let w = img.width, h = img.height;
+  if (w > MAX || h > MAX) {
+    if (w > h) { h = h * MAX / w; w = MAX; }
+    else { w = w * MAX / h; h = MAX; }
+  }
+  w = Math.floor(w); h = Math.floor(h);
+  canvas.width = W = w;
+  canvas.height = H = h;
+
+  ctx.drawImage(img, 0, 0, W, H);
+  originalImageData = ctx.getImageData(0, 0, W, H);
+
+  // Init buffers
+  displacement = new Float32Array(W * H * 2);
+  velocity = new Float32Array(W * H * 2);
+
+  // Hide dropzone, show panel
+  dropzone.classList.add('hidden');
+  setTimeout(() => dropzone.style.display = 'none', 400);
+  panel.style.display = 'flex';
+
+  if (!running) {
+    running = true;
+    requestAnimationFrame(loop);
+  }
+}
+
+/* ---------- Fluid simulation ----------
+   Approach: maintain a velocity field and a displacement field.
+   Mouse input adds velocity. Each frame:
+     1. velocity decays (viscosity)
+     2. displacement += velocity
+     3. displacement diffuses (averaged with neighbors)
+     4. render: each pixel samples from (x + dx, y + dy) of original
+   This is a fast approximation of advection — looks like liquid.
+*/
+
+function addForce(cx, cy, fx, fy, radius) {
+  const r2 = radius * radius;
+  const xmin = Math.max(0, Math.floor(cx - radius));
+  const xmax = Math.min(W - 1, Math.ceil(cx + radius));
+  const ymin = Math.max(0, Math.floor(cy - radius));
+  const ymax = Math.min(H - 1, Math.ceil(cy + radius));
+
+  for (let y = ymin; y <= ymax; y++) {
+    for (let x = xmin; x <= xmax; x++) {
+      const dx = x - cx, dy = y - cy;
+      const d2 = dx * dx + dy * dy;
+      if (d2 > r2) continue;
+      const falloff = 1 - d2 / r2;
+      const idx = (y * W + x) * 2;
+      velocity[idx]     += fx * falloff;
+      velocity[idx + 1] += fy * falloff;
+    }
+  }
+}
+
+function calm(cx, cy, radius) {
+  // Right-click: damp velocity & displacement in radius
+  const r2 = radius * radius;
+  const xmin = Math.max(0, Math.floor(cx - radius));
+  const xmax = Math.min(W - 1, Math.ceil(cx + radius));
+  const ymin = Math.max(0, Math.floor(cy - radius));
+  const ymax = Math.min(H - 1, Math.ceil(cy + radius));
+
+  for (let y = ymin; y <= ymax; y++) {
+    for (let x = xmin; x <= xmax; x++) {
+      const dx = x - cx, dy = y - cy;
+      const d2 = dx * dx + dy * dy;
+      if (d2 > r2) continue;
+      const falloff = 1 - d2 / r2;
+      const idx = (y * W + x) * 2;
+      velocity[idx]     *= (1 - falloff * 0.5);
+      velocity[idx + 1] *= (1 - falloff * 0.5);
+      displacement[idx]     *= (1 - falloff * 0.3);
+      displacement[idx + 1] *= (1 - falloff * 0.3);
+    }
+  }
+}
+
+function step() {
+  // Update displacement from velocity + apply viscosity
+  const N = W * H;
+  for (let i = 0; i < N; i++) {
+    const i2 = i * 2;
+    displacement[i2]     += velocity[i2];
+    displacement[i2 + 1] += velocity[i2 + 1];
+    velocity[i2]     *= viscosity;
+    velocity[i2 + 1] *= viscosity;
+    // Slowly return displacement to zero (elasticity)
+    displacement[i2]     *= 0.985;
+    displacement[i2 + 1] *= 0.985;
+  }
+
+  // Light diffusion of displacement (blur with 4-neighbor average)
+  // Only every 2nd frame to save CPU
+  if ((frameCount & 1) === 0) {
+    for (let y = 1; y < H - 1; y++) {
+      for (let x = 1; x < W - 1; x++) {
+        const i = (y * W + x) * 2;
+        const l = i - 2, r = i + 2, u = i - W * 2, d = i + W * 2;
+        displacement[i]     = (displacement[i]     * 0.6 + (displacement[l]     + displacement[r]     + displacement[u]     + displacement[d])     * 0.1);
+        displacement[i + 1] = (displacement[i + 1] * 0.6 + (displacement[l + 1] + displacement[r + 1] + displacement[u + 1] + displacement[d + 1]) * 0.1);
+      }
+    }
+  }
+}
+
+/* ---------- Rendering ---------- */
+
+let outputData = null;
+
+function render() {
+  if (!outputData) outputData = ctx.createImageData(W, H);
+  const src = originalImageData.data;
+  const dst = outputData.data;
+
+  if (mode === 'velocity') {
+    // Visualize velocity field as color (vx → red, vy → blue)
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const i = (y * W + x) * 2;
+        const vx = velocity[i], vy = velocity[i + 1];
+        const dx = displacement[i], dy = displacement[i + 1];
+        const speed = Math.sqrt(vx*vx + vy*vy) * 25 + Math.sqrt(dx*dx + dy*dy) * 3;
+        const j = (y * W + x) * 4;
+        dst[j]     = Math.min(255, Math.abs(vx) * 80 + speed);
+        dst[j + 1] = Math.min(255, speed * 0.6);
+        dst[j + 2] = Math.min(255, Math.abs(vy) * 80 + speed);
+        dst[j + 3] = 255;
+      }
+    }
+  } else {
+    // Normal & ink: warp original image by displacement
+    // Bilinear sampling for smooth look
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const i = (y * W + x) * 2;
+        const sx = x + displacement[i];
+        const sy = y + displacement[i + 1];
+
+        const x0 = Math.floor(sx), y0 = Math.floor(sy);
+        const x1 = x0 + 1, y1 = y0 + 1;
+        const fx = sx - x0, fy = sy - y0;
+
+        // Clamp to bounds
+        const cx0 = x0 < 0 ? 0 : (x0 >= W ? W - 1 : x0);
+        const cx1 = x1 < 0 ? 0 : (x1 >= W ? W - 1 : x1);
+        const cy0 = y0 < 0 ? 0 : (y0 >= H ? H - 1 : y0);
+        const cy1 = y1 < 0 ? 0 : (y1 >= H ? H - 1 : y1);
+
+        const p00 = (cy0 * W + cx0) * 4;
+        const p10 = (cy0 * W + cx1) * 4;
+        const p01 = (cy1 * W + cx0) * 4;
+        const p11 = (cy1 * W + cx1) * 4;
+
+        const w00 = (1 - fx) * (1 - fy);
+        const w10 = fx * (1 - fy);
+        const w01 = (1 - fx) * fy;
+        const w11 = fx * fy;
+
+        const j = (y * W + x) * 4;
+        dst[j]     = src[p00]     * w00 + src[p10]     * w10 + src[p01]     * w01 + src[p11]     * w11;
+        dst[j + 1] = src[p00 + 1] * w00 + src[p10 + 1] * w10 + src[p01 + 1] * w01 + src[p11 + 1] * w11;
+        dst[j + 2] = src[p00 + 2] * w00 + src[p10 + 2] * w10 + src[p01 + 2] * w01 + src[p11 + 2] * w11;
+        dst[j + 3] = 255;
+
+        if (mode === 'ink') {
+          // Tint by velocity magnitude — like swirling ink
+          const vx = velocity[i], vy = velocity[i + 1];
+          const speed = Math.min(1, Math.sqrt(vx*vx + vy*vy) * 0.4);
+          dst[j]     = dst[j]     * (1 - speed) + 255 * speed * 0.3;
+          dst[j + 1] = dst[j + 1] * (1 - speed) + 50 * speed;
+          dst[j + 2] = dst[j + 2] * (1 - speed) + 90 * speed;
+        }
+      }
+    }
+  }
+
+  ctx.putImageData(outputData, 0, 0);
+}
+
+/* ---------- Main loop ---------- */
+
+let frameCount = 0;
+let lastTime = performance.now();
+let fpsAccum = 0, fpsFrames = 0;
+
+function loop() {
+  if (!running) return;
+  frameCount++;
+
+  // Continuous force while dragging
+  if (mouse.down) {
+    const fx = (mouse.x - mouse.px) * force * 0.15;
+    const fy = (mouse.y - mouse.py) * force * 0.15;
+    if (mouse.button === 2) {
+      calm(mouse.x, mouse.y, brushSize);
+    } else {
+      addForce(mouse.x, mouse.y, fx, fy, brushSize);
+    }
+    mouse.px = mouse.x;
+    mouse.py = mouse.y;
+  }
+
+  step();
+  render();
+
+  // FPS
+  const now = performance.now();
+  const dt = now - lastTime;
+  lastTime = now;
+  fpsAccum += dt;
+  fpsFrames++;
+  if (fpsAccum > 500) {
+    const fps = Math.round(1000 / (fpsAccum / fpsFrames));
+    fpsEl.textContent = `${fps} FPS`;
+    fpsAccum = 0;
+    fpsFrames = 0;
+  }
+
+  requestAnimationFrame(loop);
+}
+
+/* ---------- Mouse / touch handling ---------- */
+
+function canvasCoords(e) {
+  const rect = canvas.getBoundingClientRect();
+  const x = ((e.clientX - rect.left) / rect.width)  * W;
+  const y = ((e.clientY - rect.top)  / rect.height) * H;
+  return { x, y };
+}
+
+canvas.addEventListener('mousedown', (e) => {
+  e.preventDefault();
+  const p = canvasCoords(e);
+  mouse.x = mouse.px = p.x;
+  mouse.y = mouse.py = p.y;
+  mouse.down = true;
+  mouse.button = e.button;
+});
+
+canvas.addEventListener('mousemove', (e) => {
+  const p = canvasCoords(e);
+  mouse.x = p.x;
+  mouse.y = p.y;
+});
+
+window.addEventListener('mouseup', () => { mouse.down = false; });
+canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+// Touch support
+canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  const t = e.touches[0];
+  const p = canvasCoords(t);
+  mouse.x = mouse.px = p.x;
+  mouse.y = mouse.py = p.y;
+  mouse.down = true;
+  mouse.button = 0;
+}, { passive: false });
+
+canvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  const t = e.touches[0];
+  const p = canvasCoords(t);
+  mouse.x = p.x;
+  mouse.y = p.y;
+}, { passive: false });
+
+canvas.addEventListener('touchend', () => { mouse.down = false; });
+
+/* ---------- File drop ---------- */
+
+fileInput.addEventListener('change', (e) => {
+  if (e.target.files[0]) loadImage(e.target.files[0]);
+});
+
+['dragenter', 'dragover'].forEach(ev =>
+  window.addEventListener(ev, (e) => {
+    e.preventDefault();
+    dropzone.classList.add('dragover');
+  })
+);
+
+['dragleave', 'drop'].forEach(ev =>
+  window.addEventListener(ev, (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('dragover');
+  })
+);
+
+window.addEventListener('drop', (e) => {
+  e.preventDefault();
+  if (e.dataTransfer.files[0]) loadImage(e.dataTransfer.files[0]);
+});
+
+/* ---------- Controls ---------- */
+
+document.getElementById('brushSize').addEventListener('input', (e) => {
+  brushSize = +e.target.value;
+  document.getElementById('brushSizeVal').textContent = brushSize;
+});
+document.getElementById('force').addEventListener('input', (e) => {
+  force = +e.target.value;
+  document.getElementById('forceVal').textContent = force;
+});
+document.getElementById('viscosity').addEventListener('input', (e) => {
+  viscosity = +e.target.value / 100;
+  document.getElementById('viscosityVal').textContent = e.target.value;
+});
+
+document.querySelectorAll('.modes button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    mode = btn.dataset.mode;
+  });
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (!displacement) return;
+  displacement.fill(0);
+  velocity.fill(0);
+});
+
+document.getElementById('newImgBtn').addEventListener('click', () => {
+  fileInput.click();
+});
+
+document.getElementById('saveBtn').addEventListener('click', () => {
+  const link = document.createElement('a');
+  link.download = 'fluid-image.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+});
+
+</script>
+</body>
+</html>
