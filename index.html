@@ -390,9 +390,10 @@ const btnUndo       = document.getElementById('btnUndo');
 const btnRedo       = document.getElementById('btnRedo');
 
 let W = 0, H = 0;
-let origData   = null;
-let frozenData = null;   // snapshot of pixel state at freeze moment
-let outImgData = null;
+let origData     = null;  // current "base" used by renderer
+let trueOrigData = null;  // NEVER modified — always the original loaded image
+let frozenData   = null;  // snapshot of pixel state at freeze moment
+let outImgData   = null;
 let dX = null, dY = null;
 let vX = null, vY = null;
 
@@ -438,16 +439,12 @@ function activateFreeze() {
 }
 
 function deactivateFreeze() {
-  // Use frozenData as the new origData so edits continue from frozen state
-  if (frozenData) {
-    origData = new ImageData(new Uint8ClampedArray(frozenData.data), W, H);
-  }
+  // Do NOT overwrite origData — keep the true original intact
   frozenData = null;
   isFrozen = false;
   freezeBadge.classList.remove('visible');
   canvas.classList.remove('is-frozen');
   toolRow.classList.remove('frozen-mode');
-  // Restore previous tool highlight
   setTool(activeTool === 'freeze' ? 'smear' : activeTool);
 }
 
@@ -517,8 +514,9 @@ function initImage(img) {
   W = w; H = h;
   canvas.width = W; canvas.height = H;
   ctx.drawImage(img, 0, 0, W, H);
-  origData   = ctx.getImageData(0, 0, W, H);
-  frozenData = null;
+  origData     = ctx.getImageData(0, 0, W, H);
+  trueOrigData = new ImageData(new Uint8ClampedArray(origData.data), W, H);
+  frozenData   = null;
   outImgData = ctx.createImageData(W, H);
 
   const N = W * H;
@@ -547,6 +545,9 @@ function resetSim() {
   dX.fill(0); dY.fill(0); vX.fill(0); vY.fill(0);
   ripples = [];
   if (isFrozen) deactivateFreeze();
+  // Restore to the true original image
+  origData = new ImageData(new Uint8ClampedArray(trueOrigData.data), W, H);
+  render();
 }
 
 function showDropzone() {
