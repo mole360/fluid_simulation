@@ -12,17 +12,13 @@
     --ink: #f5f1e8;
     --accent: #ff3d5a;
     --accent2: #4fd1c5;
+    --accent3: #f7c948;
     --panel: rgba(20,20,28,0.92);
     --border: rgba(245,241,232,0.13);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  html, body {
-    height: 100%; overflow: hidden;
-    background: var(--bg); color: var(--ink);
-    font-family: 'Space Mono', monospace; cursor: crosshair;
-  }
+  html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--ink); font-family: 'Space Mono', monospace; cursor: crosshair; }
 
   body::before {
     content: ''; position: fixed; inset: 0;
@@ -32,13 +28,10 @@
     pointer-events: none; z-index: 0;
   }
 
-  #stage {
-    position: relative; width: 100vw; height: 100vh;
-    display: flex; align-items: center; justify-content: center; z-index: 1;
-  }
+  #stage { position: relative; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; z-index: 1; }
 
   canvas {
-    display: block; max-width: 90vw; max-height: 78vh;
+    display: block; max-width: 90vw; max-height: 74vh;
     border: 1px solid var(--border);
     box-shadow: 0 0 0 1px rgba(255,61,90,0.1), 0 20px 80px rgba(0,0,0,0.6);
     background: #000;
@@ -51,7 +44,6 @@
     pointer-events: none;
   }
   header > * { pointer-events: auto; }
-
   .brand { font-family: 'Bodoni Moda', serif; font-style: italic; font-size: 28px; font-weight: 400; }
   .brand span { color: var(--accent); font-weight: 700; }
 
@@ -63,81 +55,163 @@
   }
   .back-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateX(-3px); }
 
+  /* ===== PANEL ===== */
   .panel {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-    background: var(--panel); backdrop-filter: blur(20px); border: 1px solid var(--border);
-    padding: 18px 24px; z-index: 10;
-    display: flex; align-items: center; gap: 20px; flex-wrap: wrap; max-width: 95vw;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--panel); backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    padding: 10px 20px 12px; z-index: 10;
+    display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap;
   }
 
-  .control { display: flex; flex-direction: column; gap: 5px; min-width: 100px; }
-  .control label { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.55; }
-  .control .val { font-size: 11px; color: var(--accent2); font-weight: 700; }
+  .tool-section { display: flex; flex-direction: column; gap: 4px; }
+  .tool-section-label {
+    font-size: 8px; text-transform: uppercase; letter-spacing: 2.5px;
+    opacity: 0.35; padding-bottom: 2px; border-bottom: 1px solid var(--border);
+    margin-bottom: 3px; white-space: nowrap;
+  }
+  .tool-section-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+  .tool-btn {
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    text-transform: uppercase; letter-spacing: 1px; padding: 6px 10px;
+    background: transparent; color: var(--ink); border: 1px solid var(--border);
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+  }
+  .tool-btn .tool-icon { font-size: 13px; line-height: 1; }
+  .tool-btn:hover { background: rgba(255,61,90,0.1); border-color: rgba(255,61,90,0.4); }
+  .tool-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .tool-btn.active-blue { background: var(--accent2); color: var(--bg); border-color: var(--accent2); }
+  .tool-btn.active-yellow { background: var(--accent3); color: var(--bg); border-color: var(--accent3); }
+
+  .modes { display: flex; border: 1px solid var(--border); }
+  .modes button {
+    background: transparent; color: var(--ink); border: none;
+    border-right: 1px solid var(--border); padding: 7px 10px;
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.2s;
+  }
+  .modes button:last-child { border-right: none; }
+  .modes button:hover { background: rgba(255,61,90,0.1); }
+  .modes button.active { background: var(--accent); color: var(--bg); }
+
+  .control { display: flex; flex-direction: column; gap: 4px; min-width: 88px; }
+  .control label { font-size: 8px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.45; }
+  .control .val { font-size: 10px; color: var(--accent2); font-weight: 700; }
 
   input[type="range"] {
     -webkit-appearance: none; appearance: none;
     width: 100%; height: 2px; background: rgba(245,241,232,0.18); outline: none; cursor: pointer;
   }
   input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 12px; height: 12px;
+    -webkit-appearance: none; width: 11px; height: 11px;
     background: var(--accent); border-radius: 50%; cursor: pointer;
   }
   input[type="range"]::-moz-range-thumb {
-    width: 12px; height: 12px; background: var(--accent); border: none; border-radius: 50%;
+    width: 11px; height: 11px; background: var(--accent); border: none; border-radius: 50%;
   }
-
-  .modes { display: flex; border: 1px solid var(--border); }
-  .modes button {
-    background: transparent; color: var(--ink); border: none;
-    border-right: 1px solid var(--border); padding: 9px 13px;
-    font-family: 'Space Mono', monospace; font-size: 10px;
-    text-transform: uppercase; letter-spacing: 1.5px; cursor: pointer; transition: all 0.2s;
-  }
-  .modes button:last-child { border-right: none; }
-  .modes button:hover { background: rgba(255,61,90,0.1); }
-  .modes button.active { background: var(--accent); color: var(--bg); }
 
   .btn {
-    font-family: 'Space Mono', monospace; font-size: 11px;
-    text-transform: uppercase; letter-spacing: 1.5px; padding: 10px 15px;
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px;
     background: transparent; color: var(--ink); border: 1px solid var(--border);
-    cursor: pointer; transition: all 0.25s;
+    cursor: pointer; transition: all 0.25s; white-space: nowrap;
   }
   .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn:disabled { opacity: 0.25; cursor: not-allowed; }
+  .btn:disabled:hover { border-color: var(--border); color: var(--ink); }
   .btn-primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
   .btn-primary:hover { background: transparent; color: var(--accent); }
 
+  .divider { width: 1px; height: 50px; background: var(--border); flex-shrink: 0; }
+
+  /* Freeze badge */
+  .freeze-badge {
+    display: none; position: fixed; top: 72px; left: 50%; transform: translateX(-50%);
+    background: var(--accent3); color: var(--bg); padding: 5px 14px;
+    font-size: 9px; letter-spacing: 3px; text-transform: uppercase; z-index: 20;
+    animation: pulse 1.5s infinite;
+  }
+  .freeze-badge.visible { display: block; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+  /* Undo counter */
+  .undo-info { font-size: 9px; letter-spacing: 1px; opacity: 0.4; white-space: nowrap; align-self: center; }
+
+  /* FPS + hint */
+  .fps { position: fixed; top: 72px; left: 28px; font-size: 10px; letter-spacing: 2px; color: var(--accent2); opacity: 0.65; z-index: 5; }
+  .brush-hint { position: fixed; top: 72px; right: 28px; font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; opacity: 0.28; z-index: 5; text-align: right; }
+
+  /* Ripple flash */
+  .ripple-flash {
+    position: fixed; pointer-events: none; z-index: 50;
+    border-radius: 50%; border: 2px solid var(--accent2);
+    transform: translate(-50%,-50%);
+    animation: ripple-out 0.65s ease-out forwards;
+  }
+  @keyframes ripple-out {
+    from { width: 10px; height: 10px; opacity: 1; }
+    to   { width: 130px; height: 130px; opacity: 0; }
+  }
+
+  /* ===== DROPZONE ===== */
   .dropzone {
     position: fixed; inset: 0; background: rgba(10,10,15,0.97); backdrop-filter: blur(20px);
     z-index: 100; display: flex; align-items: center; justify-content: center;
     flex-direction: column; text-align: center; transition: opacity 0.4s;
   }
   .dropzone.hidden { opacity: 0; pointer-events: none; }
-  .dropzone-inner { border: 2px dashed var(--border); padding: 70px 90px; transition: all 0.3s; max-width: 580px; }
   .dropzone.dragover .dropzone-inner { border-color: var(--accent); background: rgba(255,61,90,0.05); transform: scale(1.02); }
+
+  .dropzone-back {
+    position: fixed; top: 22px; left: 28px; z-index: 110;
+    font-family: 'Space Mono', monospace; font-size: 12px;
+    text-transform: uppercase; letter-spacing: 2px; color: var(--ink);
+    text-decoration: none; padding: 10px 18px; border: 1px solid var(--border);
+    background: var(--panel); backdrop-filter: blur(10px); transition: all 0.3s;
+  }
+  .dropzone-back:hover { border-color: var(--accent); color: var(--accent); transform: translateX(-3px); }
+  .dropzone-back.hidden { display: none; }
+
+  .dropzone-brand {
+    position: fixed; top: 22px; right: 28px; z-index: 110;
+    font-family: 'Bodoni Moda', serif; font-style: italic; font-size: 24px;
+  }
+  .dropzone-brand span { color: var(--accent); font-weight: 700; }
+  .dropzone-brand.hidden { display: none; }
+
+  .dropzone-inner { border: 2px dashed var(--border); padding: 58px 76px; transition: all 0.3s; max-width: 560px; }
+
   .dropzone h1 {
     font-family: 'Bodoni Moda', serif; font-style: italic; font-weight: 400;
-    font-size: 68px; line-height: 1; margin-bottom: 18px; letter-spacing: -2px;
+    font-size: 60px; line-height: 1; margin-bottom: 14px; letter-spacing: -2px;
   }
   .dropzone h1 span { color: var(--accent); }
-  .dropzone p { font-size: 12px; text-transform: uppercase; letter-spacing: 3px; opacity: 0.55; margin-bottom: 32px; }
+  .dropzone > .dropzone-inner > p { font-size: 11px; text-transform: uppercase; letter-spacing: 3px; opacity: 0.55; margin-bottom: 10px; }
+
+  .dropzone-instructions {
+    margin: 14px 0 24px; padding: 14px 18px;
+    border: 1px solid var(--border); background: rgba(245,241,232,0.03); text-align: left;
+  }
+  .dropzone-instructions p { font-size: 9px; letter-spacing: 1.5px; opacity: 0.55; text-transform: uppercase; margin-bottom: 8px; }
+  .dropzone-instructions ul { list-style: none; }
+  .dropzone-instructions li { font-size: 9px; letter-spacing: 1px; opacity: 0.4; padding: 2px 0; display: flex; gap: 8px; }
+  .dropzone-instructions li::before { content: '→'; color: var(--accent2); flex-shrink: 0; }
+
   .upload-btn {
     display: inline-block; background: var(--accent); color: var(--bg);
-    padding: 15px 34px; font-size: 11px; text-transform: uppercase;
+    padding: 14px 32px; font-size: 11px; text-transform: uppercase;
     letter-spacing: 2px; cursor: pointer; font-weight: 700; transition: all 0.3s;
   }
   .upload-btn:hover { background: var(--ink); }
-  .hint { margin-top: 28px; font-size: 10px; letter-spacing: 2px; opacity: 0.35; }
-
-  .fps { position: fixed; top: 76px; left: 28px; font-size: 10px; letter-spacing: 2px; color: var(--accent2); opacity: 0.65; z-index: 5; }
-  .info { position: fixed; top: 50%; right: 24px; transform: translateY(-50%) rotate(90deg); transform-origin: right center; font-size: 9px; letter-spacing: 4px; text-transform: uppercase; opacity: 0.25; z-index: 5; white-space: nowrap; }
+  .hint { margin-top: 22px; font-size: 10px; letter-spacing: 2px; opacity: 0.3; }
 
   @media (max-width: 768px) {
-    .dropzone h1 { font-size: 40px; }
-    .dropzone-inner { padding: 44px 24px; }
-    .panel { padding: 12px; gap: 10px; }
-    .control { min-width: 75px; }
-    .brand { font-size: 20px; }
+    .dropzone h1 { font-size: 36px; }
+    .dropzone-inner { padding: 32px 18px; }
+    .panel { padding: 8px 10px 10px; gap: 8px; }
+    .control { min-width: 70px; }
   }
 </style>
 </head>
@@ -145,111 +219,222 @@
 
 <header>
   <div class="brand">Fluid<span>Image</span></div>
-  <a href="/" class="back-btn">&#8592; Sp&#228;&#357; na port&#225;l</a>
+  <a href="/" class="back-btn">&#8592; Späť na portál</a>
 </header>
 
-<div class="fps" id="fps">&#8212; FPS</div>
-<div class="info">ŤAHAJ · PRAVÝ KLIK UPOKOJÍ</div>
+<div class="fps" id="fps">— FPS</div>
+<div class="brush-hint" id="brushHint">ŤAHAJ MYŠOU</div>
+<div class="freeze-badge" id="freezeBadge">❄ FREEZE AKTÍVNY</div>
 
-<div id="stage">
-  <canvas id="canvas"></canvas>
+<div id="stage"><canvas id="canvas"></canvas></div>
+
+<!-- ===== CONTROL PANEL ===== -->
+<div class="panel" id="panel" style="display:none;">
+
+  <div class="tool-section">
+    <div class="tool-section-label">Nástroj (klávesy: S W E I R C F)</div>
+    <div class="tool-section-row">
+      <button class="tool-btn active" data-tool="smear">
+        <span class="tool-icon">💧</span>Smear
+      </button>
+      <button class="tool-btn" data-tool="swirl">
+        <span class="tool-icon">🌀</span>Swirl
+      </button>
+      <button class="tool-btn" data-tool="explode">
+        <span class="tool-icon">💥</span>Explode
+      </button>
+      <button class="tool-btn" data-tool="implode">
+        <span class="tool-icon">🕳</span>Implode
+      </button>
+      <button class="tool-btn" data-tool="ripple">
+        <span class="tool-icon">〰</span>Ripple
+      </button>
+      <button class="tool-btn" data-tool="calm">
+        <span class="tool-icon">🧊</span>Calm
+      </button>
+      <button class="tool-btn" data-tool="freeze">
+        <span class="tool-icon">❄</span>Freeze
+      </button>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="tool-section">
+    <div class="tool-section-label">Vizualizácia</div>
+    <div class="modes">
+      <button data-mode="normal" class="active">Normal</button>
+      <button data-mode="velocity">Velocity</button>
+      <button data-mode="ink">Ink</button>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="tool-section">
+    <div class="tool-section-label">Parametre</div>
+    <div class="tool-section-row">
+      <div class="control">
+        <label>Brush</label>
+        <input type="range" id="sBrush" min="5" max="120" value="35">
+        <div class="val" id="vBrush">35</div>
+      </div>
+      <div class="control">
+        <label>Sila</label>
+        <input type="range" id="sForce" min="1" max="30" value="10">
+        <div class="val" id="vForce">10</div>
+      </div>
+      <div class="control">
+        <label>Viskozita</label>
+        <input type="range" id="sViscosity" min="80" max="99" value="93">
+        <div class="val" id="vViscosity">93</div>
+      </div>
+      <div class="control">
+        <label>Max Stretch</label>
+        <input type="range" id="sMaxDisplace" min="5" max="200" value="40">
+        <div class="val" id="vMaxDisplace">40px</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="tool-section">
+    <div class="tool-section-label">História (Ctrl+Z / Ctrl+Y) &amp; Akcie</div>
+    <div class="tool-section-row">
+      <button class="btn" id="btnUndo" disabled>↩ Undo</button>
+      <button class="btn" id="btnRedo" disabled>↪ Redo</button>
+      <div class="undo-info" id="undoInfo">0/0</div>
+      <button class="btn" id="btnReset">↺ Reset</button>
+      <button class="btn" id="btnNew">Nový obr.</button>
+      <button class="btn btn-primary" id="btnSave">Uložiť PNG</button>
+    </div>
+  </div>
+
 </div>
+
+<!-- ===== DROPZONE / LANDING PAGE ===== -->
+<a href="/" class="dropzone-back" id="dropzoneBack">&#8592; Späť na portál</a>
+<div class="dropzone-brand" id="dropzoneBrand">Fluid<span>Image</span></div>
 
 <div class="dropzone" id="dropzone">
   <div class="dropzone-inner">
     <h1>Make your image<br><span>liquid.</span></h1>
-    <p>Drop an image · Watch it flow</p>
+    <p>Nahraj obrázok · Deformuj ho nástrojmi</p>
+    <div class="dropzone-instructions">
+      <p>Ako používať:</p>
+      <ul>
+        <li>Nahraj ľubovoľný obrázok (JPG, PNG, GIF…)</li>
+        <li>Smear — ťahaj pixely v smere pohybu myši</li>
+        <li>Swirl — krúživý vír, Explode/Implode — radiálne sily</li>
+        <li>Ripple — klikni pre rozbiehajúce sa vlny</li>
+        <li>Freeze — zmrazí oblasť a zapečie pixely natrvalo</li>
+        <li>Undo/Redo — Ctrl+Z / Ctrl+Y alebo tlačidlami</li>
+        <li>Ulož výsledok ako PNG tlačidlom Uložiť</li>
+      </ul>
+    </div>
     <label class="upload-btn" for="fileInput">Vybrať obrázok</label>
     <input type="file" id="fileInput" accept="image/*" style="display:none;">
     <div class="hint">alebo presuň súbor sem</div>
   </div>
 </div>
 
-<div class="panel" id="panel" style="display:none;">
-  <div class="modes">
-    <button data-mode="normal" class="active">Normal</button>
-    <button data-mode="velocity">Velocity</button>
-    <button data-mode="ink">Ink</button>
-  </div>
-
-  <div class="control">
-    <label>Brush Size</label>
-    <input type="range" id="sBrush" min="5" max="100" value="35">
-    <div class="val" id="vBrush">35</div>
-  </div>
-
-  <div class="control">
-    <label>Force</label>
-    <input type="range" id="sForce" min="1" max="30" value="10">
-    <div class="val" id="vForce">10</div>
-  </div>
-
-  <div class="control">
-    <label>Viscosity</label>
-    <input type="range" id="sViscosity" min="80" max="99" value="93">
-    <div class="val" id="vViscosity">93</div>
-  </div>
-
-  <div class="control">
-    <label>Max Stretch</label>
-    <input type="range" id="sMaxDisplace" min="5" max="150" value="40">
-    <div class="val" id="vMaxDisplace">40 px</div>
-  </div>
-
-  <button class="btn" id="btnReset">Reset</button>
-  <button class="btn" id="btnNew">Nový obrázok</button>
-  <button class="btn btn-primary" id="btnSave">Uložiť PNG</button>
-</div>
-
 <script>
 /* =================================================================
-   FLUID IMAGE — Liquid Smear Simulation
-   Princíp: displacement field + inverzné bilineárne vzorkovanie
-   - Pohyb nastáva LEN keď sa myš pohybuje (nie pri stoji)
-   - Každý pixel má svoju velocity a displacement
-   - Keď displacement > maxDisplace, pružina ho ťahá späť
+   FLUID IMAGE v2
+   Nástroje: Smear · Swirl · Explode · Implode · Ripple · Calm · Freeze
+   Undo/Redo: displacement-field snapshot stack (max 20 krokov)
    ================================================================= */
 
-const canvas    = document.getElementById('canvas');
-const ctx       = canvas.getContext('2d', { willReadFrequently: true });
-const dropzone  = document.getElementById('dropzone');
-const fileInput = document.getElementById('fileInput');
-const panel     = document.getElementById('panel');
-const fpsEl     = document.getElementById('fps');
+const canvas        = document.getElementById('canvas');
+const ctx           = canvas.getContext('2d', { willReadFrequently: true });
+const dropzone      = document.getElementById('dropzone');
+const dropzoneBack  = document.getElementById('dropzoneBack');
+const dropzoneBrand = document.getElementById('dropzoneBrand');
+const fileInput     = document.getElementById('fileInput');
+const panel         = document.getElementById('panel');
+const fpsEl         = document.getElementById('fps');
+const brushHint     = document.getElementById('brushHint');
+const freezeBadge   = document.getElementById('freezeBadge');
+const undoInfo      = document.getElementById('undoInfo');
+const btnUndo       = document.getElementById('btnUndo');
+const btnRedo       = document.getElementById('btnRedo');
 
 let W = 0, H = 0;
 let origData   = null;
+let frozenData = null;
 let outImgData = null;
+let dX = null, dY = null;
+let vX = null, vY = null;
 
-// Displacement a velocity — každý pixel má svoju hodnotu
-let dX = null, dY = null;  // displacement (o koľko je pixel posunutý od originálu)
-let vX = null, vY = null;  // velocity (aktuálna rýchlosť pohybu)
-
-// Parametre
 let brushSize   = 35;
 let forceMul    = 10;
 let viscosity   = 0.93;
 let maxDisplace = 40;
-let mode        = 'normal';
+let renderMode  = 'normal';
+let activeTool  = 'smear';
+let isFrozen    = false;
 
-// Myš — sledujeme pohyb medzi framami
-let mouse = { x: 0, y: 0, px: 0, py: 0, down: false, btn: 0 };
+// Ripple waves
+let ripples = [];
+
+// Mouse
+let mouse = { x: 0, y: 0, px: 0, py: 0, down: false };
 
 // Loop
 let running = false, frameCount = 0;
 let lastT = performance.now(), fpsAcc = 0, fpsCnt = 0;
 
-/* ---- Načítanie obrázka ---- */
+/* ===== UNDO / REDO ===== */
+const UNDO_MAX = 20;
+let undoStack = [], redoStack = [];
+
+function saveSnapshot() {
+  if (!dX) return;
+  undoStack.push({ dX: dX.slice(), dY: dY.slice() });
+  if (undoStack.length > UNDO_MAX) undoStack.shift();
+  redoStack = [];
+  updateUndoUI();
+}
+
+function undo() {
+  if (!undoStack.length) return;
+  redoStack.push({ dX: dX.slice(), dY: dY.slice() });
+  const s = undoStack.pop();
+  dX.set(s.dX); dY.set(s.dY);
+  vX.fill(0); vY.fill(0);
+  updateUndoUI();
+}
+
+function redo() {
+  if (!redoStack.length) return;
+  undoStack.push({ dX: dX.slice(), dY: dY.slice() });
+  const s = redoStack.pop();
+  dX.set(s.dX); dY.set(s.dY);
+  vX.fill(0); vY.fill(0);
+  updateUndoUI();
+}
+
+function updateUndoUI() {
+  btnUndo.disabled = !undoStack.length;
+  btnRedo.disabled = !redoStack.length;
+  undoInfo.textContent = undoStack.length + '/' + (undoStack.length + redoStack.length);
+}
+
+// Auto-snapshot každé 2s počas ťahania
+let lastSnapT = 0;
+function maybeAutoSnap() {
+  const now = performance.now();
+  if (now - lastSnapT > 2000) { saveSnapshot(); lastSnapT = now; }
+}
+
+/* ===== IMAGE INIT ===== */
 
 function loadFile(file) {
   if (!file || !file.type.startsWith('image/')) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const img = new Image();
-    img.onload = () => initImage(img);
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
+  const r = new FileReader();
+  r.onload = e => { const img = new Image(); img.onload = () => initImage(img); img.src = e.target.result; };
+  r.readAsDataURL(file);
 }
 
 function initImage(img) {
@@ -263,13 +448,20 @@ function initImage(img) {
   canvas.width = W; canvas.height = H;
   ctx.drawImage(img, 0, 0, W, H);
   origData   = ctx.getImageData(0, 0, W, H);
+  frozenData = null;
   outImgData = ctx.createImageData(W, H);
 
   const N = W * H;
   dX = new Float32Array(N); dY = new Float32Array(N);
   vX = new Float32Array(N); vY = new Float32Array(N);
+  ripples = []; isFrozen = false;
+  freezeBadge.classList.remove('visible');
+  undoStack = []; redoStack = [];
+  updateUndoUI();
 
   dropzone.classList.add('hidden');
+  dropzoneBack.classList.add('hidden');
+  dropzoneBrand.classList.add('hidden');
   setTimeout(() => { dropzone.style.display = 'none'; }, 420);
   panel.style.display = 'flex';
 
@@ -278,242 +470,341 @@ function initImage(img) {
 
 function resetSim() {
   if (!dX) return;
+  saveSnapshot();
   dX.fill(0); dY.fill(0); vX.fill(0); vY.fill(0);
-  outImgData = ctx.createImageData(W, H);
-  ctx.putImageData(origData, 0, 0);
+  ripples = []; isFrozen = false; frozenData = null;
+  freezeBadge.classList.remove('visible');
 }
 
-/* ---- Aplikovanie sily myšou ---- */
+function showDropzone() {
+  running = false;
+  panel.style.display = 'none';
+  dropzone.style.display = 'flex';
+  dropzoneBack.classList.remove('hidden');
+  dropzoneBrand.classList.remove('hidden');
+  setTimeout(() => { dropzone.classList.remove('hidden'); }, 10);
+}
 
-function applyForce() {
-  // Delta pohybu myši od minulého framu
-  const mdx = mouse.x - mouse.px;
-  const mdy = mouse.y - mouse.py;
-  const moveLen = Math.sqrt(mdx * mdx + mdy * mdy);
+/* ===== BRUSH HELPERS ===== */
 
-  // Ak sa myš nepohla viac ako 0.3px — nič nerobíme
-  // Toto zaistí že pri stoji sa nič nehýbe
-  if (moveLen < 0.3) return;
+function region(cx, cy, r) {
+  return {
+    x0: Math.max(0, Math.floor(cx - r)),
+    x1: Math.min(W-1, Math.ceil(cx + r)),
+    y0: Math.max(0, Math.floor(cy - r)),
+    y1: Math.min(H-1, Math.ceil(cy + r)),
+    r2: r * r
+  };
+}
 
-  // Normalizovaný smer pohybu myši
-  const nx = mdx / moveLen;
-  const ny = mdy / moveLen;
+/* SMEAR */
+function applySmear() {
+  const mdx = mouse.x - mouse.px, mdy = mouse.y - mouse.py;
+  const len = Math.sqrt(mdx*mdx + mdy*mdy);
+  if (len < 0.3) return;
+  const nx = mdx/len, ny = mdy/len;
+  const power = Math.min(len, 20) * forceMul * 0.07;
+  const { x0,x1,y0,y1,r2 } = region(mouse.x, mouse.y, brushSize);
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+    const dx = x-mouse.x, dy = y-mouse.y, d2 = dx*dx+dy*dy;
+    if (d2 > r2) continue;
+    const fo = (1-d2/r2); const i = y*W+x;
+    vX[i] += nx * power * fo * fo;
+    vY[i] += ny * power * fo * fo;
+  }
+}
 
-  // Sila závisí od rýchlosti pohybu myši
-  const power = Math.min(moveLen, 20) * forceMul * 0.07;
+/* SWIRL — krúživý vír */
+function applySwirl() {
+  const spd = forceMul * 0.15;
+  const { x0,x1,y0,y1,r2 } = region(mouse.x, mouse.y, brushSize);
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+    const dx = x-mouse.x, dy = y-mouse.y, d2 = dx*dx+dy*dy;
+    if (d2 > r2) continue;
+    const fo = 1-d2/r2, dist = Math.sqrt(d2)+0.001;
+    // Tangenciálny smer (kolmý na polomer)
+    const tx = -dy/dist, ty = dx/dist;
+    const i = y*W+x;
+    vX[i] += tx * spd * fo * fo;
+    vY[i] += ty * spd * fo * fo;
+  }
+}
 
-  const cx = mouse.x, cy = mouse.y;
-  const r  = brushSize, r2 = r * r;
+/* EXPLODE — radiálne von */
+function applyExplode() {
+  const pw = forceMul * 0.28;
+  const { x0,x1,y0,y1,r2 } = region(mouse.x, mouse.y, brushSize);
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+    const dx = x-mouse.x, dy = y-mouse.y, d2 = dx*dx+dy*dy;
+    if (d2 > r2 || d2 < 1) continue;
+    const fo = 1-d2/r2, dist = Math.sqrt(d2);
+    const i = y*W+x;
+    vX[i] += (dx/dist) * pw * fo * fo;
+    vY[i] += (dy/dist) * pw * fo * fo;
+  }
+}
 
-  const x0 = Math.max(0, Math.floor(cx - r));
-  const x1 = Math.min(W - 1, Math.ceil(cx + r));
-  const y0 = Math.max(0, Math.floor(cy - r));
-  const y1 = Math.min(H - 1, Math.ceil(cy + r));
+/* IMPLODE — radiálne dnu */
+function applyImplode() {
+  const pw = forceMul * 0.28;
+  const { x0,x1,y0,y1,r2 } = region(mouse.x, mouse.y, brushSize);
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+    const dx = x-mouse.x, dy = y-mouse.y, d2 = dx*dx+dy*dy;
+    if (d2 > r2 || d2 < 1) continue;
+    const fo = 1-d2/r2, dist = Math.sqrt(d2);
+    const i = y*W+x;
+    vX[i] -= (dx/dist) * pw * fo * fo;
+    vY[i] -= (dy/dist) * pw * fo * fo;
+  }
+}
 
-  for (let y = y0; y <= y1; y++) {
-    for (let x = x0; x <= x1; x++) {
-      const dx = x - cx, dy = y - cy;
-      const d2 = dx * dx + dy * dy;
-      if (d2 > r2) continue;
-      // Kvadratický falloff — plynulý prechod od stredu k okraju
-      const t = 1 - d2 / r2;
-      const falloff = t * t;
-      const i = y * W + x;
-      vX[i] += nx * power * falloff;
-      vY[i] += ny * power * falloff;
+/* RIPPLE — spawn vlny pri kliknutí */
+function spawnRipple(cx, cy) {
+  ripples.push({ cx, cy, r: 0, strength: forceMul * 1.6, age: 0 });
+  // Vizuálny kruh flash
+  const el = document.createElement('div');
+  el.className = 'ripple-flash';
+  const rect = canvas.getBoundingClientRect();
+  el.style.left = (rect.left + cx * rect.width/W) + 'px';
+  el.style.top  = (rect.top  + cy * rect.height/H) + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 700);
+}
+
+function stepRipples() {
+  const spd   = 4.5;
+  const life  = 75;
+  const waveW = Math.max(8, brushSize * 0.35);
+
+  for (let ri = ripples.length - 1; ri >= 0; ri--) {
+    const rp = ripples[ri];
+    rp.r  += spd;
+    rp.age++;
+    const decay = 1 - rp.age / life;
+    if (decay <= 0) { ripples.splice(ri, 1); continue; }
+
+    const r = rp.r;
+    const x0 = Math.max(0, Math.floor(rp.cx - r - waveW));
+    const x1 = Math.min(W-1, Math.ceil(rp.cx + r + waveW));
+    const y0 = Math.max(0, Math.floor(rp.cy - r - waveW));
+    const y1 = Math.min(H-1, Math.ceil(rp.cy + r + waveW));
+
+    for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+      const dx = x-rp.cx, dy = y-rp.cy;
+      const d = Math.sqrt(dx*dx + dy*dy);
+      const diff = d - r;
+      if (Math.abs(diff) > waveW) continue;
+      // Gaussov prstenec + sínusová vlna
+      const ring = Math.exp(-(diff*diff) / (waveW*waveW*0.45));
+      const wave = Math.sin(rp.age * 0.42 - d * 0.16);
+      const i = y*W+x;
+      const nx = dx/(d+0.001), ny = dy/(d+0.001);
+      const f = ring * decay * rp.strength * 0.2;
+      vX[i] += nx * f * wave;
+      vY[i] += ny * f * wave;
     }
   }
 }
 
+/* CALM */
 function applyCalm() {
-  const cx = mouse.x, cy = mouse.y;
-  const r = brushSize, r2 = r * r;
-  const x0 = Math.max(0, Math.floor(cx - r));
-  const x1 = Math.min(W - 1, Math.ceil(cx + r));
-  const y0 = Math.max(0, Math.floor(cy - r));
-  const y1 = Math.min(H - 1, Math.ceil(cy + r));
-  for (let y = y0; y <= y1; y++) {
-    for (let x = x0; x <= x1; x++) {
-      const dx = x - cx, dy = y - cy;
-      const d2 = dx * dx + dy * dy;
-      if (d2 > r2) continue;
-      const falloff = 1 - d2 / r2;
-      const i = y * W + x;
-      vX[i] *= (1 - falloff * 0.9);
-      vY[i] *= (1 - falloff * 0.9);
-      dX[i] *= (1 - falloff * 0.15);
-      dY[i] *= (1 - falloff * 0.15);
-    }
+  const { x0,x1,y0,y1,r2 } = region(mouse.x, mouse.y, brushSize);
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+    const dx = x-mouse.x, dy = y-mouse.y, d2 = dx*dx+dy*dy;
+    if (d2 > r2) continue;
+    const fo = 1-d2/r2, i = y*W+x;
+    vX[i] *= 1 - fo*0.93;
+    vY[i] *= 1 - fo*0.93;
+    dX[i] *= 1 - fo*0.13;
+    dY[i] *= 1 - fo*0.13;
   }
 }
 
-/* ---- Simulačný krok ---- */
+/* FREEZE — zapečie aktuálny pixel render do frozenData, nuluje vel */
+function applyFreeze() {
+  const { x0,x1,y0,y1,r2 } = region(mouse.x, mouse.y, brushSize);
+
+  if (!frozenData) {
+    frozenData = new ImageData(new Uint8ClampedArray(origData.data), W, H);
+  }
+
+  const cur = ctx.getImageData(0, 0, W, H);
+
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+    const dx = x-mouse.x, dy = y-mouse.y, d2 = dx*dx+dy*dy;
+    if (d2 > r2) continue;
+    const fo = 1 - d2/r2;
+    const pi = y*W+x;
+    const ci = pi*4;
+    // Zapečie aktuálny pixel do frozenData (blend)
+    for (let c = 0; c < 4; c++) {
+      frozenData.data[ci+c] = Math.round(cur.data[ci+c]*fo + frozenData.data[ci+c]*(1-fo));
+    }
+    vX[pi] = 0; vY[pi] = 0;
+    dX[pi] *= 1 - fo;
+    dY[pi] *= 1 - fo;
+  }
+
+  isFrozen = true;
+  freezeBadge.classList.add('visible');
+}
+
+/* ===== SIMULAČNÝ KROK ===== */
 
 function step() {
-  const N = W * H;
+  if (mouse.down) {
+    maybeAutoSnap();
+    if      (activeTool === 'smear')   applySmear();
+    else if (activeTool === 'swirl')   applySwirl();
+    else if (activeTool === 'explode') applyExplode();
+    else if (activeTool === 'implode') applyImplode();
+    else if (activeTool === 'calm')    applyCalm();
+    else if (activeTool === 'freeze')  applyFreeze();
+  }
 
+  stepRipples();
+
+  const N = W * H;
   for (let i = 0; i < N; i++) {
-    // Integruj velocity do displacement
     dX[i] += vX[i];
     dY[i] += vY[i];
 
-    // Vzdialenosť od pôvodnej pozície
-    const dist = Math.sqrt(dX[i] * dX[i] + dY[i] * dY[i]);
-
+    const dist = Math.sqrt(dX[i]*dX[i] + dY[i]*dY[i]);
     if (dist > 0.01) {
-      const inv = 1 / dist;
-      let spring = 0;
-
-      if (dist > maxDisplace) {
-        // Prekročil limit — silná pružina ťahá späť
-        spring = (dist - maxDisplace) * 0.12 + 0.03;
-      } else {
-        // Pod limitom — slabá pasívna pružina (pomalý návrat)
-        spring = dist * 0.003;
-      }
-
+      const inv = 1/dist;
+      const spring = dist > maxDisplace
+        ? (dist - maxDisplace) * 0.12 + 0.03
+        : dist * 0.003;
       vX[i] -= dX[i] * inv * spring;
       vY[i] -= dY[i] * inv * spring;
     }
 
-    // Viskozita (útlm)
     vX[i] *= viscosity;
     vY[i] *= viscosity;
-
-    // Zastav mikro-vibrácie
     if (Math.abs(vX[i]) < 0.0008) vX[i] = 0;
     if (Math.abs(vY[i]) < 0.0008) vY[i] = 0;
   }
 
-  // Difúzia velocity každé 2 framy (šíri pohyb do okolia)
+  // Velocity difúzia
   if ((frameCount & 1) === 0) {
-    for (let y = 1; y < H - 1; y++) {
-      for (let x = 1; x < W - 1; x++) {
-        const i = y * W + x;
-        const n = (y-1)*W+x, s = (y+1)*W+x;
-        const ww = y*W+(x-1), e = y*W+(x+1);
-        const spread = 0.05;
-        vX[i] += (vX[n] + vX[s] + vX[ww] + vX[e] - vX[i] * 4) * spread;
-        vY[i] += (vY[n] + vY[s] + vY[ww] + vY[e] - vY[i] * 4) * spread;
-      }
+    const sp = 0.05;
+    for (let y = 1; y < H-1; y++) for (let x = 1; x < W-1; x++) {
+      const i = y*W+x;
+      const n=(y-1)*W+x, s=(y+1)*W+x, ww=y*W+(x-1), e=y*W+(x+1);
+      vX[i] += (vX[n]+vX[s]+vX[ww]+vX[e] - vX[i]*4)*sp;
+      vY[i] += (vY[n]+vY[s]+vY[ww]+vY[e] - vY[i]*4)*sp;
     }
   }
 }
 
-/* ---- Render ---- */
+/* ===== RENDER ===== */
 
 function render() {
-  const src = origData.data;
+  const src = (isFrozen && frozenData) ? frozenData.data : origData.data;
   const dst = outImgData.data;
 
-  if (mode === 'velocity') {
-    for (let i = 0; i < W * H; i++) {
-      const speed = Math.sqrt(vX[i]*vX[i] + vY[i]*vY[i]);
-      const j = i * 4;
-      dst[j]   = Math.min(255, Math.abs(vX[i]) * 70 + speed * 20);
-      dst[j+1] = Math.min(255, speed * 40);
-      dst[j+2] = Math.min(255, Math.abs(vY[i]) * 70 + speed * 20);
+  if (renderMode === 'velocity') {
+    for (let i = 0; i < W*H; i++) {
+      const spd = Math.sqrt(vX[i]*vX[i]+vY[i]*vY[i]);
+      const j = i*4;
+      dst[j]   = Math.min(255, Math.abs(vX[i])*70 + spd*20);
+      dst[j+1] = Math.min(255, spd*40);
+      dst[j+2] = Math.min(255, Math.abs(vY[i])*70 + spd*20);
       dst[j+3] = 255;
     }
     ctx.putImageData(outImgData, 0, 0);
     return;
   }
 
-  // Normal + Ink: inverzné vzorkovanie
-  // Výstupný pixel (x,y) berie farbu z originálu na pozícii (x - dX, y - dY)
-  // Toto je korektný inverzný warp — bez dier, bez artefaktov
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      const i  = y * W + x;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const i  = y*W+x;
+    const sx = x - dX[i], sy = y - dY[i];
+    const x0 = sx|0, y0 = sy|0, x1 = x0+1, y1 = y0+1;
+    const fx = sx-x0, fy = sy-y0;
+    const ax0 = x0<0?0:x0>=W?W-1:x0, ax1 = x1<0?0:x1>=W?W-1:x1;
+    const ay0 = y0<0?0:y0>=H?H-1:y0, ay1 = y1<0?0:y1>=H?H-1:y1;
+    const p00=(ay0*W+ax0)*4, p10=(ay0*W+ax1)*4;
+    const p01=(ay1*W+ax0)*4, p11=(ay1*W+ax1)*4;
+    const w00=(1-fx)*(1-fy), w10=fx*(1-fy), w01=(1-fx)*fy, w11=fx*fy;
+    const j = i*4;
+    dst[j]   = src[p00]*w00+src[p10]*w10+src[p01]*w01+src[p11]*w11;
+    dst[j+1] = src[p00+1]*w00+src[p10+1]*w10+src[p01+1]*w01+src[p11+1]*w11;
+    dst[j+2] = src[p00+2]*w00+src[p10+2]*w10+src[p01+2]*w01+src[p11+2]*w11;
+    dst[j+3] = 255;
 
-      // Zdrojová (originálna) pozícia pre tento výstupný pixel
-      const sx = x - dX[i];
-      const sy = y - dY[i];
-
-      // Bilineárna interpolácia
-      const x0 = sx | 0, y0 = sy | 0;
-      const x1 = x0 + 1, y1 = y0 + 1;
-      const fx = sx - x0, fy = sy - y0;
-
-      const ax0 = x0 < 0 ? 0 : x0 >= W ? W-1 : x0;
-      const ax1 = x1 < 0 ? 0 : x1 >= W ? W-1 : x1;
-      const ay0 = y0 < 0 ? 0 : y0 >= H ? H-1 : y0;
-      const ay1 = y1 < 0 ? 0 : y1 >= H ? H-1 : y1;
-
-      const p00 = (ay0*W+ax0)*4, p10 = (ay0*W+ax1)*4;
-      const p01 = (ay1*W+ax0)*4, p11 = (ay1*W+ax1)*4;
-
-      const w00 = (1-fx)*(1-fy), w10 = fx*(1-fy);
-      const w01 = (1-fx)*fy,     w11 = fx*fy;
-
-      const j = i * 4;
-      dst[j]   = src[p00]*w00 + src[p10]*w10 + src[p01]*w01 + src[p11]*w11;
-      dst[j+1] = src[p00+1]*w00 + src[p10+1]*w10 + src[p01+1]*w01 + src[p11+1]*w11;
-      dst[j+2] = src[p00+2]*w00 + src[p10+2]*w10 + src[p01+2]*w01 + src[p11+2]*w11;
-      dst[j+3] = 255;
-
-      if (mode === 'ink') {
-        const speed = Math.min(1, Math.sqrt(vX[i]*vX[i]+vY[i]*vY[i]) * 0.6);
-        if (speed > 0.02) {
-          dst[j]   = dst[j]   * (1-speed) + 50  * speed;
-          dst[j+1] = dst[j+1] * (1-speed) + 10  * speed;
-          dst[j+2] = dst[j+2] * (1-speed) + 210 * speed;
-        }
+    if (renderMode === 'ink') {
+      const spd = Math.min(1, Math.sqrt(vX[i]*vX[i]+vY[i]*vY[i])*0.6);
+      if (spd > 0.02) {
+        dst[j]   = dst[j]*(1-spd)+50*spd;
+        dst[j+1] = dst[j+1]*(1-spd)+10*spd;
+        dst[j+2] = dst[j+2]*(1-spd)+210*spd;
       }
     }
   }
-
   ctx.putImageData(outImgData, 0, 0);
 }
 
-/* ---- Hlavná slučka ---- */
+/* ===== LOOP ===== */
 
 function loop() {
   if (!running) return;
   frameCount++;
-
-  if (mouse.down) {
-    if (mouse.btn === 2) applyCalm();
-    else applyForce();
-  }
-
-  // Ulož aktuálnu pozíciu ako "predchádzajúcu" pre ďalší frame
-  mouse.px = mouse.x;
-  mouse.py = mouse.y;
-
   step();
+  mouse.px = mouse.x; mouse.py = mouse.y;
   render();
 
   const now = performance.now();
   fpsAcc += now - lastT; lastT = now; fpsCnt++;
   if (fpsAcc > 500) {
-    fpsEl.textContent = Math.round(1000 / (fpsAcc / fpsCnt)) + ' FPS';
+    fpsEl.textContent = Math.round(1000/(fpsAcc/fpsCnt)) + ' FPS';
     fpsAcc = 0; fpsCnt = 0;
   }
-
   requestAnimationFrame(loop);
 }
 
-/* ---- Myš a touch ---- */
+/* ===== TOOL MANAGEMENT ===== */
+
+const toolHints = {
+  smear:   'ŤAHAJ MYŠOU PRE TEKUTINOVÝ EFEKT',
+  swirl:   'DRŽI A ŤAHAJ PRE KRÚŽIVÝ VÍR',
+  explode: 'DRŽI PRE VÝBUCHOVÝ EFEKT',
+  implode: 'ŤAHÁ PIXELY SMEROM DOVNÚTRA',
+  ripple:  'KLIKNI PRE VLNOVÝ EFEKT',
+  calm:    'UPOKOJUJE A ZASTAVUJE POHYB',
+  freeze:  '❄ ZAPEČIE PIXELY NATRVALO'
+};
+
+function setTool(name) {
+  activeTool = name;
+  document.querySelectorAll('.tool-btn').forEach(b => {
+    b.classList.remove('active','active-blue','active-yellow');
+  });
+  const btn = document.querySelector(`[data-tool="${name}"]`);
+  if (btn) {
+    if (name === 'freeze') btn.classList.add('active-yellow');
+    else if (['calm','ripple'].includes(name)) btn.classList.add('active-blue');
+    else btn.classList.add('active');
+  }
+  brushHint.textContent = toolHints[name] || '';
+}
+
+/* ===== MOUSE & TOUCH ===== */
 
 function toCanvas(e) {
   const r = canvas.getBoundingClientRect();
-  return {
-    x: (e.clientX - r.left) / r.width  * W,
-    y: (e.clientY - r.top)  / r.height * H
-  };
+  return { x: (e.clientX-r.left)/r.width*W, y: (e.clientY-r.top)/r.height*H };
 }
 
 canvas.addEventListener('mousedown', e => {
   e.preventDefault();
   const p = toCanvas(e);
-  mouse.x = mouse.px = p.x;
-  mouse.y = mouse.py = p.y;
-  mouse.down = true; mouse.btn = e.button;
+  mouse.x = mouse.px = p.x; mouse.y = mouse.py = p.y;
+  mouse.down = true;
+  if (activeTool === 'ripple') spawnRipple(p.x, p.y);
+  else saveSnapshot();
 });
 canvas.addEventListener('mousemove', e => {
-  const p = toCanvas(e);
-  mouse.x = p.x; mouse.y = p.y;
+  const p = toCanvas(e); mouse.x = p.x; mouse.y = p.y;
 });
 window.addEventListener('mouseup', () => { mouse.down = false; });
 canvas.addEventListener('contextmenu', e => e.preventDefault());
@@ -522,19 +813,19 @@ canvas.addEventListener('touchstart', e => {
   e.preventDefault();
   const p = toCanvas(e.touches[0]);
   mouse.x = mouse.px = p.x; mouse.y = mouse.py = p.y;
-  mouse.down = true; mouse.btn = 0;
+  mouse.down = true;
+  if (activeTool === 'ripple') spawnRipple(p.x, p.y);
+  else saveSnapshot();
 }, { passive: false });
 canvas.addEventListener('touchmove', e => {
   e.preventDefault();
-  const p = toCanvas(e.touches[0]);
-  mouse.x = p.x; mouse.y = p.y;
+  const p = toCanvas(e.touches[0]); mouse.x = p.x; mouse.y = p.y;
 }, { passive: false });
 canvas.addEventListener('touchend', () => { mouse.down = false; });
 
-/* ---- Drag and drop ---- */
+/* ===== DRAG & DROP ===== */
 
 fileInput.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
-
 ['dragenter','dragover'].forEach(ev => window.addEventListener(ev, e => {
   e.preventDefault(); dropzone.classList.add('dragover');
 }));
@@ -546,29 +837,43 @@ window.addEventListener('drop', e => {
   if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
 });
 
-/* ---- Slidery a tlačidlá ---- */
+/* ===== KEYBOARD ===== */
 
-function mkSlider(id, valId, cb) {
-  const el = document.getElementById(id);
-  const vl = document.getElementById(valId);
-  el.addEventListener('input', () => cb(+el.value, vl));
-}
+window.addEventListener('keydown', e => {
+  if (!running) return;
+  if (e.ctrlKey && !e.shiftKey && e.key === 'z') { e.preventDefault(); undo(); return; }
+  if (e.ctrlKey && (e.key === 'y' || (e.shiftKey && e.key === 'Z'))) { e.preventDefault(); redo(); return; }
+  const map = { s:'smear', w:'swirl', e:'explode', i:'implode', r:'ripple', c:'calm', f:'freeze' };
+  if (map[e.key.toLowerCase()]) setTool(map[e.key.toLowerCase()]);
+});
 
-mkSlider('sBrush',       'vBrush',       (v, el) => { brushSize   = v; el.textContent = v; });
-mkSlider('sForce',       'vForce',       (v, el) => { forceMul    = v; el.textContent = v; });
-mkSlider('sViscosity',   'vViscosity',   (v, el) => { viscosity   = v / 100; el.textContent = v; });
-mkSlider('sMaxDisplace', 'vMaxDisplace', (v, el) => { maxDisplace = v; el.textContent = v + ' px'; });
+/* ===== UI WIRING ===== */
+
+document.querySelectorAll('.tool-btn').forEach(btn => {
+  btn.addEventListener('click', () => setTool(btn.dataset.tool));
+});
 
 document.querySelectorAll('.modes button').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    mode = btn.dataset.mode;
+    renderMode = btn.dataset.mode;
   });
 });
 
+function mkSlider(id, valId, cb) {
+  const el = document.getElementById(id), vl = document.getElementById(valId);
+  el.addEventListener('input', () => cb(+el.value, vl));
+}
+mkSlider('sBrush',       'vBrush',       (v,el) => { brushSize   = v; el.textContent = v; });
+mkSlider('sForce',       'vForce',       (v,el) => { forceMul    = v; el.textContent = v; });
+mkSlider('sViscosity',   'vViscosity',   (v,el) => { viscosity   = v/100; el.textContent = v; });
+mkSlider('sMaxDisplace', 'vMaxDisplace', (v,el) => { maxDisplace = v; el.textContent = v+'px'; });
+
+btnUndo.addEventListener('click', undo);
+btnRedo.addEventListener('click', redo);
 document.getElementById('btnReset').addEventListener('click', resetSim);
-document.getElementById('btnNew').addEventListener('click', () => fileInput.click());
+document.getElementById('btnNew').addEventListener('click', showDropzone);
 document.getElementById('btnSave').addEventListener('click', () => {
   const a = document.createElement('a');
   a.download = 'fluid-image.png';
